@@ -10,8 +10,6 @@ on:
 
 jobs:
   build:
-    docker:
-      - image: cicleci/golang:1.9
     runs-on: ubuntu-latest
 
     working_directory: /go/src/github.com/franzisk/go-expert-finance
