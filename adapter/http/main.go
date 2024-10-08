@@ -14,8 +14,10 @@ func Init() {
 
 	http.HandleFunc("/transactions/create", transaction.CraeteTransaction)
 
+	// endpoint para a verificação da aplicação
 	http.HandleFunc("/health", actuator.HealthCheck)
 
+	// expõe um endpoint para fornecer métricas da aplicação
 	http.Handle("/metrics", promhttp.Handler())
 
 	http.ListenAndServe(":8080", nil)
