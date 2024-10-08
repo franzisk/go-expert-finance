@@ -12,7 +12,6 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
-    working_directory: /go/src/github.com/franzisk/go-expert-finance
     steps:
       - name: Check out the code
         uses: actions/checkout@v3
