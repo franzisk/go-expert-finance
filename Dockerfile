@@ -1,23 +1,31 @@
-# Use a imagem oficial do Go como base
-FROM golang:1.20
+# Etapa de build
+FROM golang:1.18-alpine AS builder
 
-# Definir o diretório de trabalho dentro do container
+# Define o diretório de trabalho dentro do container
 WORKDIR /app
 
-# Copiar o go.mod e o go.sum (se existirem)
-COPY go.mod go.sum ./
-
-# Baixar as dependências (caso use go.mod)
+# Copia os arquivos de dependências Go para o container
+COPY go.mod ./
+COPY go.sum ./
 RUN go mod download
 
-# Copiar o restante do código
-COPY . .
+# Copia o código-fonte da aplicação Go
+COPY *.go ./
 
-# Build da aplicação
-RUN go build -o main .
+# Compila a aplicação
+RUN go build -o /my-go-app
 
-# Definir a porta que o container vai expor
+# Etapa final (imagem leve)
+FROM alpine:latest
+
+# Define o diretório de trabalho da imagem final
+WORKDIR /root/
+
+# Copia a aplicação compilada da etapa de build
+COPY --from=builder /my-go-app .
+
+# Expõe a porta 8080 para o serviço REST
 EXPOSE 8080
 
-# Comando para rodar a aplicação
-CMD ["./main"]
+# Define o comando padrão para iniciar a aplicação
+CMD ["./my-go-app"]
