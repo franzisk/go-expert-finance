@@ -1,6 +1,6 @@
 module github.com/franzisk/go-expert-finance
 
-go 1.23
+go 1.20
 
 require github.com/prometheus/client_golang v1.20.4
 
