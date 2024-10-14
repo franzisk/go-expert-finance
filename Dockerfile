@@ -1,6 +1,9 @@
 # Etapa de build
 FROM golang:1.21-alpine AS builder
 
+# Instala dependências necessárias para o build (opcional)
+RUN apk add --no-cache git
+
 # Define o diretório de trabalho dentro do container
 WORKDIR /app
 
@@ -10,10 +13,10 @@ COPY go.sum ./
 RUN go mod download
 
 # Copia o código-fonte da aplicação Go
-COPY *.go ./
+COPY . .
 
-# Compila a aplicação
-RUN go build -o /my-go-app
+# Compila a aplicação com flags para reduzir o tamanho binário
+RUN go build -ldflags="-s -w" -o /my-go-app
 
 # Etapa final (imagem leve)
 FROM alpine:latest
