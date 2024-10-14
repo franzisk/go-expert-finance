@@ -93,4 +93,5 @@ workflows:
           requires:
             - test-go
       - deploy:
-          requires
+          requires:
+            - build-go-executables
