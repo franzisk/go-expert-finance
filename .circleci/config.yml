@@ -77,7 +77,7 @@ jobs:
       - run:
           name: Deploy to Railway
           # Usa a variável de ambiente $RAILWAY_TOKEN para autenticar a CLI do Railway
-          command: RAILWAY_TOKEN=$RAILWAY_TOKEN railway up --service my-go-app
+          command: RAILWAY_TOKEN=$RAILWAY_TOKEN railway up --project 27266e4f-5c89-46cb-be3d-8c1df45c43e6
 
 # Workflow para coordenar os jobs
 workflows:
