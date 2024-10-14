@@ -75,13 +75,9 @@ jobs:
           name: Install Railway CLI
           command: curl -fsSL https://railway.app/install.sh | sh
       - run:
-          name: Login to Railway
-          # Usa a variável de ambiente $RAILWAY_TOKEN para autenticar a CLI do Railway
-          command: echo $RAILWAY_TOKEN | railway login --ci
-      - run:
           name: Deploy to Railway
-          # Com o login feito, executa o deploy da aplicação no Railway
-          command: railway up --service my-go-app
+          # Usa a variável de ambiente $RAILWAY_TOKEN para autenticar a CLI do Railway
+          command: RAILWAY_TOKEN=$RAILWAY_TOKEN railway up --service my-go-app
 
 # Workflow para coordenar os jobs
 workflows:
