@@ -71,6 +71,10 @@ jobs:
     steps:
       - checkout
       - setup_remote_docker
+    # Instala o Railway CLI
+    - name: Install Railway CLI
+      run: |
+        curl -fsSL https://railway.app/install.sh | sh      
       - run:
           name: Login to Railway
           # Usa a variável de ambiente $RAILWAY_TOKEN para autenticar a CLI do Railway
