@@ -1,9 +1,9 @@
-# This config was automatically generated from your source code
-# Stacks detected: artifact:go-executable:,cicd:github-actions:.github/workflows,deps:go:.
 version: 2.1
+
+# Definindo jobs para build, teste e deploy
 jobs:
   test-go:
-    # Install go modules and run tests
+    # Instala módulos Go e executa testes
     docker:
       - image: cimg/go:1.20
     steps:
@@ -15,7 +15,19 @@ jobs:
           command: go mod download
       - run:
           name: Print go mod help instructions
-          command: "echo \"go mod download will fail if you have private repositories \nOne way to fix this for private go modules that are hosted in github:\n  1. Add a GITHUB_TOKEN and GITHUB_USER to an org context. Please refer to https://circleci.com/docs/contexts/ for more informaiton on how to use contexts.\n  2. Add a .circleci/config.yml to your repository or use this config.yml as a starting template\n  3. Configure the jobs to use the newly created context which includes GITHUB_TOKEN and GITHUB_USER  \n  4. Before downloading the modules you will need to add a step to execute \\\"go env -w GOPRIVATE=github.com/<OrgNameHere>\\\". \n\tThis allows go mod to install private repos under OrgNameHere.\n  5. You will also need to run \\\"git config --global url.\\\"https://$GITHUB_USER:$GITHUB_TOKEN@github.com/<OrgNameHere>/\\\".insteadOf \\\"https://github.com/<OrgNameHere>/\\\"\\\"\n  6. Finally include the \\\"go mod download\\\" it should be able to fetch your private libraries now. \nFor gitlab private go modules, follow the same instructions as above but include your GITLAB_TOKEN and GITLAB_USER.\nThen use gitlab.com instead of github.com in steps 4 and 5.\nSee https://go.dev/ref/mod#private-modules for more details.\""
+          command: |
+            echo "go mod download will fail if you have private repositories 
+            One way to fix this for private go modules that are hosted in github:
+              1. Add a GITHUB_TOKEN and GITHUB_USER to an org context. Please refer to https://circleci.com/docs/contexts/ for more information on how to use contexts.
+              2. Add a .circleci/config.yml to your repository or use this config.yml as a starting template.
+              3. Configure the jobs to use the newly created context which includes GITHUB_TOKEN and GITHUB_USER.
+              4. Before downloading the modules you will need to add a step to execute \"go env -w GOPRIVATE=github.com/<OrgNameHere>\". 
+              This allows go mod to install private repos under OrgNameHere.
+              5. You will also need to run \"git config --global url.\"https://$GITHUB_USER:$GITHUB_TOKEN@github.com/<OrgNameHere>/\".insteadOf \"https://github.com/<OrgNameHere>/\".
+              6. Finally include the \"go mod download\" it should be able to fetch your private libraries now. 
+            For gitlab private go modules, follow the same instructions as above but include your GITLAB_TOKEN and GITLAB_USER.
+            Then use gitlab.com instead of github.com in steps 4 and 5.
+            See https://go.dev/ref/mod#private-modules for more details."
           when: on_fail
       - save_cache:
           key: go-mod-{{ checksum "go.sum" }}
@@ -26,8 +38,9 @@ jobs:
           command: gotestsum --junitfile junit.xml
       - store_test_results:
           path: junit.xml
+
   build-go-executables:
-    # Build go executables and store them as artifacts
+    # Compila executáveis Go e armazena como artefatos
     docker:
       - image: cimg/go:1.20
     steps:
@@ -37,10 +50,6 @@ jobs:
       - run:
           name: Download Go modules
           command: go mod download
-      - run:
-          name: Print go mod help instructions
-          command: "echo \"go mod download will fail if you have private repositories \nOne way to fix this for private go modules that are hosted in github:\n  1. Add a GITHUB_TOKEN and GITHUB_USER to an org context. Please refer to https://circleci.com/docs/contexts/ for more informaiton on how to use contexts.\n  2. Add a .circleci/config.yml to your repository or use this config.yml as a starting template\n  3. Configure the jobs to use the newly created context which includes GITHUB_TOKEN and GITHUB_USER  \n  4. Before downloading the modules you will need to add a step to execute \\\"go env -w GOPRIVATE=github.com/<OrgNameHere>\\\". \n\tThis allows go mod to install private repos under OrgNameHere.\n  5. You will also need to run \\\"git config --global url.\\\"https://$GITHUB_USER:$GITHUB_TOKEN@github.com/<OrgNameHere>/\\\".insteadOf \\\"https://github.com/<OrgNameHere>/\\\"\\\"\n  6. Finally include the \\\"go mod download\\\" it should be able to fetch your private libraries now. \nFor gitlab private go modules, follow the same instructions as above but include your GITLAB_TOKEN and GITLAB_USER.\nThen use gitlab.com instead of github.com in steps 4 and 5.\nSee https://go.dev/ref/mod#private-modules for more details.\""
-          when: on_fail
       - save_cache:
           key: go-mod-{{ checksum "go.sum" }}
           paths:
@@ -54,27 +63,32 @@ jobs:
       - store_artifacts:
           path: ~/artifacts
           destination: executables
-deploy:
-  docker:
-    - image: cimg/go:1.20
-  steps:
-    - checkout
-    - setup_remote_docker
-    - run:
-        name: Login to Railway
-        # Usa a variável de ambiente $RAILWAY_TOKEN para autenticar a CLI do Railway
-        command: echo $RAILWAY_TOKEN | railway login --ci
-    - run:
-        name: Deploy to Railway
-        # Com o login feito, executa o deploy da aplicação no Railway
-        command: railway up --service my-go-app
+
+  deploy:
+    # Realiza o deploy da aplicação no Railway
+    docker:
+      - image: cimg/go:1.20
+    steps:
+      - checkout
+      - setup_remote_docker
+      - run:
+          name: Login to Railway
+          # Usa a variável de ambiente $RAILWAY_TOKEN para autenticar a CLI do Railway
+          command: echo $RAILWAY_TOKEN | railway login --ci
+      - run:
+          name: Deploy to Railway
+          # Com o login feito, executa o deploy da aplicação no Railway
+          command: railway up --service my-go-app
+
+# Workflow para coordenar os jobs
 workflows:
+  version: 2
   build-and-test:
     jobs:
       - test-go
       - build-go-executables:
           requires:
             - test-go
-    - deploy:
-         requires:
-           - build-go-executables
+      - deploy:
+          requires:
+            - build-go-executables
